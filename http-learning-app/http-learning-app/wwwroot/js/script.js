@@ -10,14 +10,40 @@ const resultContainer = document.getElementById('resultContainer');
 
 const httpHeadersDictionary = {
     "accept": "Media type(s) that is/are acceptable for the response.",
+    "accept-charset": "Character sets that are acceptable.",
     "accept-encoding": "List of acceptable encodings.",
+    "accept-language": "List of acceptable human languages for response.",
+    "accept-datetime": "Acceptable version in time.",
+    "access-control-request-method": "Used when issuing a preflight request to let the server know what HTTP method will be used.",
+    "access-control-request-headers": "Used when issuing a preflight request to let the server know what HTTP headers will be used.",
     "authorization": "Authentication credentials for HTTP authentication.",
-    "cache-control": "Directives for caching mechanisms.",
-    "content-length": "The length of the request body in octets (8-bit bytes).",
-    "content-type": "The Media type of the body of the request.",
-    "date": "The date and time that the message was sent.",
+    "cache-control": "Directives for caching mechanisms in both requests and responses.",
+    "connection": "Control options for the current connection and list of hop-by-hop response fields.",
+    "content-length": "The size of the entity-body, in decimal number of octets, sent to the recipient.",
+    "content-md5": "An MD5 sum of the entity-body for the purpose of providing an end-to-end message integrity check.",
+    "content-type": "The Media type of the body of the request (used with POST and PUT requests).",
+    "cookie": "An HTTP cookie previously sent by the server with Set-Cookie (below).",
+    "date": "The date and time that the message was originated.",
+    "expect": "Indicates that particular server behaviors are required by the client.",
+    "forwarded": "Disclose original information of a client connecting to a web server through an HTTP proxy.",
+    "from": "The email address of the user making the request.",
     "host": "The domain name of the server (for virtual hosting), and the TCP port number on which the server is listening.",
-    "user-agent": "The user agent string of the user agent."
+    "if-match": "Only perform the action if the client supplied entity matches the same entity on the server.",
+    "if-modified-since": "Allows a 304 Not Modified to be returned if content is unchanged.",
+    "if-none-match": "Allows a 304 Not Modified to be returned if content is unchanged.",
+    "if-range": "If the entity is unchanged, send me the part(s) that I am missing; otherwise, send me the entire new entity.",
+    "if-unmodified-since": "Only send the response if the entity has not been modified since a specific time.",
+    "max-forwards": "Limit the number of times the message can be forwarded through proxies or gateways.",
+    "origin": "Initiates a request for cross-origin resource sharing with Origin.",
+    "pragma": "Implementation-specific fields that may have various effects anywhere along the request-response chain.",
+    "proxy-authorization": "Authorization credentials for connecting to a proxy.",
+    "range": "Request only part of an entity.",
+    "referer": "This is the address of the previous web page from which a link to the currently requested page was followed.",
+    "te": "The transfer encodings the user agent is willing to accept.",
+    "user-agent": "The user agent string of the user agent.",
+    "upgrade": "Ask the server to upgrade to another protocol.",
+    "via": "Informs the server of proxies through which the request was sent.",
+    "warning": "A general warning about possible problems with the entity body."
     // Add more headers as needed
 };
 
@@ -99,7 +125,7 @@ function displayResponse(response) {
     addNewLine(responseContainer);
 
     addHeadersTable(responseContainer, headers);
-    
+
     let responseBodyTextNode = document.createTextNode('Response Body:');
     responseContainer.appendChild(responseBodyTextNode);
     addNewLine(responseContainer);
