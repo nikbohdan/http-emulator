@@ -66,6 +66,7 @@ namespace http_learning_app.Controllers
                 if (contentType == "application/json")
                 {
                     deserializedBody = JsonConvert.DeserializeObject(body);
+                    deserializedBody = JsonConvert.SerializeObject(deserializedBody);
                 }
                 else if (contentType == "text/plain")
                 {
