@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HTTP Simulator</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 5px;
+        }
+
+        button[type="submit"] {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            overflow-x: auto;
+        }
+
+        #resultContainer {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
+
+        table {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            padding: 5px;
+            text-align: left;
+        }
+
+        td {
+            padding: 5px;
+        }
+
+        .header-controls {
+            display: flex;
+        }
+
+            .header-controls button {
+                margin-left: 5px;
+            }
+
+        .toggle-button {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+            .toggle-button input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+            .slider:before {
+                position: absolute;
+                content: "";
+                height: 26px;
+                width: 26px;
+                left: 4px;
+                bottom: 4px;
+                background-color: white;
+                -webkit-transition: .4s;
+                transition: .4s;
+            }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+            .slider.round:before {
+                border-radius: 50%;
+            }
+    </style>
+</head>
+<body>
+    <h1>HTTP Simulator</h1>
+
+    <form id="requestForm">
+        <h2>URL Input Type:</h2>
+        <span>Custom URL</span>
+        <div class="toggle-button">
+            <input type="checkbox" id="toggle" name="urlType" value="custom">
+            <label class="slider round" for="toggle"></label>
+        </div>
+        <span>Endpoints</span>
+
+        <div id="urlInputs">
+            <!-- URL Select -->
+            <select id="urlSelect" style="display: none;">
+                <option value="https://api.example.com/endpoint1">Endpoint 1</option>
+                <option value="https://api.example.com/endpoint2">Endpoint 2</option>
+                <option value="https://api.example.com/endpoint3">Endpoint 3</option>
+            </select>
+
+            <!-- Custom URL Input -->
+            <input type="text" id="urlInput" placeholder="Enter custom URL" style="display: block;">
+        </div>
+
+
+        <label for="methodSelect">Method:</label>
+        <select id="methodSelect" onchange="updateHeaderAutocomplete()">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+        </select>
+
+        <h2>Headers:</h2>
+        <table id="headersTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Value</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <input type="text" class="header-name" placeholder="Name" list="headerNames">
+                        <datalist id="headerNames"></datalist>
+                    </td>
+
+                    <td><input type="text" class="header-value" placeholder="Value"></td>
+                    <td class="header-controls"><button type="button" onclick="addHeaderRow()">+</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <label for="bodyInputType">Body Input Type:</label>
+        <div id="bodyInputType">
+            <input type="radio" name="bodyType" value="none" checked> None
+            <input type="radio" name="bodyType" value="table"> Table
+            <input type="radio" name="bodyType" value="text"> Text
+        </div>
+
+        <div id="bodyInputs">
+            <!-- Таблица для ввода данных -->
+            <table id="bodyTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Value</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <input type="text" class="body-name" placeholder="Name">
+                        </td>
+                        <td>
+                            <input type="text" class="body-value" placeholder="Value">
+                        </td>
+                        <td class="body-controls">
+                            <button type="button" onclick="addBodyRow()">+</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Поле для ввода произвольного текста -->
+            <textarea id="bodyText" rows="4" placeholder="Request body" style="display: none;"></textarea>
+        </div>
+
+        <button type="submit">Send Request</button>
+    </form>
+
+    <h2>HTTP Request:</h2>
+    <pre id="requestContainer"></pre>
+
+    <h2>Response:</h2>
+    <div id="responseContainer"></div>
+    <!--<pre id="responseContainer"></pre>-->
+
+    <h2>Result:</h2>
+    <div id="resultContainer"></div>
+
+    <script src="js/test.js"></script>
+</body>
+</html>

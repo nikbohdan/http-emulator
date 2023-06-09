@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>HTTP Simulator</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 5px;
+        }
+
+        button[type="submit"] {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            overflow-x: auto;
+        }
+
+        #resultContainer {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>HTTP Simulator</h1>
+
+    <form id="requestForm">
+        <label for="urlInput">URL:</label>
+        <input type="text" id="urlInput" placeholder="https://api.example.com">
+
+        <label for="methodSelect">Method:</label>
+        <select id="methodSelect">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+        </select>
+
+        <label for="headersTextarea">Headers:</label>
+        <textarea id="headersTextarea" rows="4" placeholder="Content-Type: application/json"></textarea>
+
+        <label for="bodyTextarea">Body:</label>
+        <textarea id="bodyTextarea" rows="4" placeholder="Request body"></textarea>
+
+        <button type="submit">Send Request</button>
+    </form>
+
+    <h2>HTTP Request:</h2>
+    <pre id="requestContainer"></pre>
+
+    <h2>Response:</h2>
+    <div id="responseContainer"></div>
+    <!--<pre id="responseContainer"></pre>-->
+
+    <h2>Result:</h2>
+    <div id="resultContainer"></div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
+
+

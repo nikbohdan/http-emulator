@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 
 
-namespace http_learning_app.Controllers
+namespace HttpLearningApp.API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
