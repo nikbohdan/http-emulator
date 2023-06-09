@@ -3,6 +3,7 @@
 <head>
     <title>HTTP Simulator</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -78,14 +79,92 @@
             .header-controls button {
                 margin-left: 5px;
             }
+
+        .toggle-button {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+            .toggle-button input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+            .slider:before {
+                position: absolute;
+                content: "";
+                height: 26px;
+                width: 26px;
+                left: 4px;
+                bottom: 4px;
+                background-color: white;
+                -webkit-transition: .4s;
+                transition: .4s;
+            }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+            .slider.round:before {
+                border-radius: 50%;
+            }
     </style>
 </head>
 <body>
     <h1>HTTP Simulator</h1>
 
     <form id="requestForm">
-        <label for="urlInput">URL:</label>
-        <input type="text" id="urlInput" placeholder="https://api.example.com">
+        <h2>URL Input Type:</h2>
+        <span>Custom URL</span>
+        <div class="toggle-button">
+            <input type="checkbox" id="toggle" name="urlType" value="custom">
+            <label class="slider round" for="toggle"></label>
+        </div>
+        <span>Endpoints</span>
+
+        <div id="urlInputs">
+            <!-- URL Select -->
+            <select id="urlSelect" style="display: none;">
+                <option value="https://api.example.com/endpoint1">Endpoint 1</option>
+                <option value="https://api.example.com/endpoint2">Endpoint 2</option>
+                <option value="https://api.example.com/endpoint3">Endpoint 3</option>
+            </select>
+
+            <!-- Custom URL Input -->
+            <input type="text" id="urlInput" placeholder="Enter custom URL" style="display: block;">
+        </div>
+
 
         <label for="methodSelect">Method:</label>
         <select id="methodSelect" onchange="updateHeaderAutocomplete()">
@@ -107,7 +186,7 @@
             <tbody>
                 <tr>
                     <td>
-                        <input type="text" class="header-key" placeholder="Name" list="headerNames">
+                        <input type="text" class="header-name" placeholder="Name" list="headerNames">
                         <datalist id="headerNames"></datalist>
                     </td>
 
@@ -160,7 +239,8 @@
     <pre id="requestContainer"></pre>
 
     <h2>Response:</h2>
-    <pre id="responseContainer"></pre>
+    <div id="responseContainer"></div>
+    <!--<pre id="responseContainer"></pre>-->
 
     <h2>Result:</h2>
     <div id="resultContainer"></div>

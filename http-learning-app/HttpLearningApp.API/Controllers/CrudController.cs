@@ -30,6 +30,28 @@ namespace HttpLearningApp.API.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> GetUpdateUser()
+        {
+            var updUser = new User
+            {
+                Id = 1,
+                Email = "test@gmail.com",
+                Name = "Bohdan"
+            };
+
+            await this.userService.UpdateUserAsync(updUser);
+
+            var user = await this.userService.GetUserAsync(1);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(user);
+        }
+
+        [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await this.userService.GetAllUsersAsync();
@@ -55,9 +77,7 @@ namespace HttpLearningApp.API.Controllers
         [HttpPut]
         public async Task<IActionResult> PutUser([FromBody] User user)
         {
-
-            var dbUser = await this.userService.GetUserAsync(user.Id);
-            if (dbUser == null)
+            if (!await this.userService.UserExist(user.Id))
             {
                 var createdUserId = await this.userService.AddUserAsync(user);
                 var uri = $"/Crud/GetUser/{createdUserId}";
@@ -66,7 +86,6 @@ namespace HttpLearningApp.API.Controllers
 
             await this.userService.UpdateUserAsync(user);
             return NoContent();
-
         }
 
         [HttpDelete]
