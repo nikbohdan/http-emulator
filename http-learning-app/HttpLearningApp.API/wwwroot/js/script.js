@@ -11,6 +11,9 @@ const responseContainer = document.getElementById('responseContainer');
 const responsePreContainer = document.getElementById('responsePreContainer');
 const requestViewContainer = document.getElementById('requestViewContainer');
 const requestViewPreContainer = document.getElementById('requestViewPreContainer');
+const requestViewH = document.getElementById('requestViewH');
+const resultH = document.getElementById('resultH');
+const resultContainer = document.getElementById('resultContainer');
 const toggleButton = document.getElementById('toggle');
 const urlSelect = document.getElementById('urlSelect');
 const endpointInput = document.getElementById('endpointInput');
@@ -165,13 +168,15 @@ methodSelect.addEventListener('change', function () {
 // Обработчик события изменения типа ввода для URL
 toggleButton.addEventListener('change', function () {
     if (toggleButton.checked) {
-        //urlSelect.style.display = 'block';
         endpointInput.style.display = 'block';
         urlInput.style.display = 'none';
+        resultH.style.display = 'none';
+        resultContainer.style.display = 'none';
     } else {
-        //urlSelect.style.display = 'none';
         endpointInput.style.display = 'none';
         urlInput.style.display = 'block';
+        resultH.style.display = 'block';
+        resultContainer.style.display = 'block';
     }
 });
 
@@ -260,23 +265,6 @@ function updateHeaderAutocomplete() {
     headerNameInputs.forEach(input => {
         input.setAttribute('list', 'headerNames');
     });
-
-    //if (header === 'Content-Type') {
-    //    const headerValues = document.getElementById('headerValues');
-
-    //    // Clear existing options
-    //    headerValues.innerHTML = '';
-
-    //    // Define suggested values for "Content-Type"
-    //    const contentTypes = ['application/json', 'application/xml', 'application/x-www-form-urlencoded', 'text/plain'];
-
-    //    // Create new options
-    //    contentTypes.forEach(contentType => {
-    //        const option = document.createElement('option');
-    //        option.value = contentType;
-    //        headerValues.appendChild(option);
-    //    });
-    //}
 }
 
 function clearHeadersTable() {
@@ -421,6 +409,7 @@ form.addEventListener('submit', async (e) => {
 
     removeAllChildNodes(requestViewContainer);
     requestViewPreContainer.textContent = "";
+    resultContainer.innerHTML = '';
 
     const config = {
         method,
@@ -435,6 +424,9 @@ form.addEventListener('submit', async (e) => {
         displayRequest(config);
         if (response.status !== 204) {
             displayRequestView(response);
+        } else {
+            preContainerCleanAndInvisibility(requestViewPreContainer);
+            requestViewH.style.display = 'none';
         }
         displayResponse(response);
         displayResult(response.data);
@@ -443,12 +435,6 @@ form.addEventListener('submit', async (e) => {
             displayRequest(config);
             displayError(error);
         }
-
-        //console.error(error);
-
-        //requestContainer.textContent = 'Error occurred. Please check the console for details.';
-        //responseContainer.textContent = 'Error occurred. Please check the console for details.';
-        //resultContainer.textContent = 'Error occurred. Please check the console for details.';
     }
 });
 
@@ -476,9 +462,15 @@ function displayRequest(request) {
 }
 
 function displayRequestView(response) {
+    if (!toggleButton.checked) {
+        requestViewH.style.display = 'none';
+        preContainerCleanAndInvisibility(requestViewPreContainer);
+        return;
+    }
     removeAllChildNodes(requestViewContainer);
 
     const data = response.data.requestDetails;
+    requestViewH.style.display = 'block';
 
     for (const [name, value] of Object.entries(data)) {
         if (name.toLowerCase() == 'headers') {
@@ -486,9 +478,6 @@ function displayRequestView(response) {
             continue;
         }
         if (name.toLowerCase() == 'body') {
-            //let bodyText = 'Body:\n'
-            //bodyText += JSON.stringify(value, null, 2);
-            //responsePreContainer.textContent = bodyText;
             displayBody(value, requestViewPreContainer);
             continue;
         }
@@ -500,6 +489,7 @@ function displayRequestView(response) {
 }
 
 function displayBody(value, preContainer) {
+    preContainer.style.display = 'block';
     if (value !== null && value !== "" && value !== undefined) {
         let bodyText = 'Body:\n'
         bodyText += JSON.stringify(value, null, 2);
@@ -531,16 +521,20 @@ function displayResponse(response) {
 
     addHeadersTable(responseContainer, headers);
 
-    //let responseBodyTextNode = document.createTextNode('Response Body:');
-    //responseContainer.appendChild(responseBodyTextNode);
-    displayBody(data, responsePreContainer);
-    //let bodyText = 'Body:\n'
-    //bodyText += JSON.stringify(data, null, 2);
-    //responsePreContainer.textContent = bodyText;
+    if (toggleButton.checked) {
+        displayBody(data, responsePreContainer);
+    } else {
+        displayBody(response.data, responsePreContainer);
+    }
+
 
 }
 
 function displayResult(data) {
+    if (toggleButton.checked) {
+        return;
+    }
+
     resultContainer.innerHTML = '';
 
     const iframe = document.createElement('iframe');
@@ -571,11 +565,24 @@ function displayError(error) {
     addHeadersTable(responseContainer, response.headers);
 
     if (response.data !== null && response.data !== "") {
-        let errorText = 'Data:\n'
-        errorText += JSON.stringify(response.data, null, 2);
-        responsePreContainer.textContent = errorText;
+        if (response.data.succeeded !== null && response.data.succeeded !== undefined && !response.data.succeeded) {
+            displayRequestView(response);
+
+            let errorText = 'Data:\n'
+            errorText += JSON.stringify(response.data.data, null, 2);
+            responsePreContainer.style.display = 'block';
+            responsePreContainer.textContent = errorText;
+        } else {
+            let errorText = 'Data:\n'
+            errorText += JSON.stringify(response.data, null, 2);
+            responsePreContainer.style.display = 'block';
+            responsePreContainer.textContent = errorText;
+            preContainerCleanAndInvisibility(requestViewPreContainer);
+        }
     } else {
-        responsePreContainer.textContent = "";
+        preContainerCleanAndInvisibility(responsePreContainer);
+        preContainerCleanAndInvisibility(requestViewPreContainer);
+        requestViewH.style.display = 'none';
     }
 }
 
@@ -589,6 +596,11 @@ function addNewLine(container) {
     var br = document.createElement("span");
     br.innerHTML = "<br/>";
     container.appendChild(br);
+}
+
+function preContainerCleanAndInvisibility(container) {
+    container.textContent = "";
+    container.style.display = 'none';
 }
 
 function addHeadersTable(container, headers) {
