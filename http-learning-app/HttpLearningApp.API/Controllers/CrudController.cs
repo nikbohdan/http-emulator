@@ -39,28 +39,7 @@ namespace HttpLearningApp.API.Controllers
             return Ok(new ResponseWrapper<User>(user, requestDetails));
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetUpdateUser()
-        {
-            var updUser = new User
-            {
-                Id = 1,
-                Email = "test@gmail.com",
-                Name = "Bohdan"
-            };
-
-            await this.userService.UpdateUserAsync(updUser);
-
-            var user = await this.userService.GetUserAsync(1);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(user);
-        }
-
+       
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -81,6 +60,7 @@ namespace HttpLearningApp.API.Controllers
             request.EnableBuffering(); // Enables request body buffering
 
             var requestDetails = await this.requestDetailsService.GetRequestDetails(request);
+            requestDetails.Body = addUserDTO;
 
             try
             {
@@ -104,6 +84,7 @@ namespace HttpLearningApp.API.Controllers
             request.EnableBuffering(); // Enables request body buffering
 
             var requestDetails = await this.requestDetailsService.GetRequestDetails(request);
+            requestDetails.Body = user;
             try
             {
                 if (!await this.userService.UserExist(user.Id))

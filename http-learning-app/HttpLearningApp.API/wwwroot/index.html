@@ -1,17 +1,33 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
+
 <head>
     <title>HTTP Simulator</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="css/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin-bottom: 20px;
+            max-width: 100%;
         }
 
         h1 {
+            background-color: #4CAF50;
             text-align: center;
+            margin-top: 0px;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            font-weight: 700;
+            color: white;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 700;
         }
 
         form {
@@ -20,8 +36,9 @@
 
         label {
             display: block;
-            font-weight: bold;
+            font-weight: 700;
             margin-top: 10px;
+            font-size: 20px;
         }
 
         input[type="text"],
@@ -38,7 +55,13 @@
             color: white;
             border: none;
             cursor: pointer;
+            border-radius: 5px;
         }
+
+            button[type="submit"]:hover {
+                background-color: #3e8e41;
+                color: #fff;
+            }
 
         pre {
             background-color: #f5f5f5;
@@ -56,44 +79,346 @@
             height: 500px;
             border: none;
         }
+
+        table {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            padding: 5px;
+            text-align: left;
+        }
+
+        td {
+            padding: 5px;
+        }
+
+        .span-url {
+            font-size: medium;
+        }
+
+        .toggle-button {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 35px;
+            padding-top: 12px;
+            margin-bottom: 10px;
+        }
+
+            .toggle-button input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+            .slider:before {
+                position: absolute;
+                content: "";
+                height: 15px;
+                width: 15px;
+                left: 3px;
+                bottom: 3px;
+                background-color: white;
+                -webkit-transition: .4s;
+                transition: .4s;
+            }
+
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #4CAF50;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(19px);
+            -ms-transform: translateX(19px);
+            transform: translateX(19px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+            .slider.round:before {
+                border-radius: 50%;
+            }
+
+        /* Стили для кнопки */
+        .help-button {
+            position: fixed;
+            top: 50%;
+            right: -35px;
+            /* Кнопка прикреплена к правому краю с отступом 20px */
+            transform: translateY(-50%) rotate(-90deg);
+            /* Поворот на 90 градусов */
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: right 0.3s ease-out;
+            /* Плавный переход при анимации */
+        }
+
+            .help-button:hover {
+                background-color: #3e8e41;
+                color: #fff;
+            }
+
+        /* Стили для окна */
+        .help-window {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: calc(33.33% - 40px);
+            /* Ширина окна (1/3 экрана) */
+            height: 100%;
+            padding: 80px;
+            background-color: #f2f2f2;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            /* Изначально окно сдвинуто за правую границу экрана */
+            transition: transform 0.3s ease-out;
+            /* Плавный переход при анимации */
+            font-size: large;
+            text-align: justify;
+        }
+
+
+
+
+        .left-section {
+            position: absolute;
+            left: 0;
+            width: 95%;
+            /* Изначально левая часть занимает 90% экрана */
+
+            padding: 20px;
+            padding-top: 0px;
+            background-color: #fff;
+            transition: width 0.3s ease-out;
+            /* Плавный переход при анимации */
+            overflow-y: auto;
+            /* Разрешаем вертикальную прокрутку */
+        }
+
+        .method-select {
+            border: 2px solid #ccc;
+            padding: 5px;
+            transition: border-color 0.3s ease;
+        }
+
+            .method-select:focus {
+                outline: none;
+                border-color: #4CAF50;
+            }
+
+
+
+
+        .header-name {
+            border: 2px solid #ccc;
+            padding: 5px;
+            transition: border-color 0.3s ease;
+        }
+
+            .header-name:focus {
+                outline: none;
+                border-color: #4CAF50;
+            }
+
+        .header-value {
+            border: 2px solid #ccc;
+            padding: 5px;
+            transition: border-color 0.3s ease;
+        }
+
+            .header-value:focus {
+                outline: none;
+                border-color: #4CAF50;
+            }
+
+        .body-name {
+            border: 2px solid #ccc;
+            padding: 5px;
+            transition: border-color 0.3s ease;
+        }
+
+            .body-name:focus {
+                outline: none;
+                border-color: #4CAF50;
+            }
+
+        .body-value {
+            border: 2px solid #ccc;
+            padding: 5px;
+            transition: border-color 0.3s ease;
+        }
+
+            .body-value:focus {
+                outline: none;
+                border-color: #4CAF50;
+            }
     </style>
 </head>
+
 <body>
     <h1>HTTP Simulator</h1>
 
-    <form id="requestForm">
-        <label for="urlInput">URL:</label>
-        <input type="text" id="urlInput" placeholder="https://api.example.com">
+    <!-- Окно с информацией -->
+    <div class="help-window"></div>
 
-        <label for="methodSelect">Method:</label>
-        <select id="methodSelect">
-            <option value="GET">GET</option>
-            <option value="POST">POST</option>
-            <option value="PUT">PUT</option>
-            <option value="DELETE">DELETE</option>
-        </select>
+    <!-- Кнопка "Help Me" -->
 
-        <label for="headersTextarea">Headers:</label>
-        <textarea id="headersTextarea" rows="4" placeholder="Content-Type: application/json"></textarea>
+    <button class="help-button">
+        <span class="glyphicon glyphicon-question-sign"></span> Help me
+    </button>
 
-        <label for="bodyTextarea">Body:</label>
-        <textarea id="bodyTextarea" rows="4" placeholder="Request body"></textarea>
+    <div class="left-section">
+        <form id="requestForm">
+            <h2>URL Input Type:</h2>
+            <span class="span-url">Custom URL</span>
+            <div class="toggle-button">
+                <input type="checkbox" id="toggle" name="urlType" value="custom">
+                <label class="slider round" for="toggle"></label>
+            </div>
+            <span class="span-url">Endpoints</span>
 
-        <button type="submit">Send Request</button>
-    </form>
+            <div id="urlInputs">
+                <!-- URL Select -->
+                <!--<select id="urlSelect" style="display: none;" class="method-select">
+        <option value="https://api.example.com/endpoint1">Endpoint 1</option>
+        <option value="https://api.example.com/endpoint2">Endpoint 2</option>
+        <option value="https://api.example.com/endpoint3">Endpoint 3</option>
+    </select>-->
+                <input type="text" placeholder="Endpoint address" style="display: none;" list="endpointsValues" id="endpointInput">
+                <datalist id="endpointsValues">
+                    <option value="/api/RequestDetails/GetRequest"></option>
+                    <option value="/api/RequestDetails/PostRequest"></option>
+                    <option value="/api/Crud/GetUser"></option>
+                    <option value="/api/Crud/GetAllUsers"></option>
+                    <option value="/api/Crud/GetAllUsers"></option>
+                    <option value="/api/Crud/PostUser"></option>
+                    <option value="/api/Crud/PutUser"></option>
+                    <option value="/api/Crud/DeleteUser"></option>
+                </datalist>
+                <!-- Custom URL Input -->
+                <input type="text" id="urlInput" placeholder="Enter custom URL" style="display: block;" class="method-select">
+            </div>
 
-    <h2>HTTP Request:</h2>
-    <pre id="requestContainer"></pre>
+            <label for="methodSelect">Method:</label>
+            <select id="methodSelect" onchange="updateHeaderAutocomplete()" class="method-select">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+            </select>
 
-    <h2>Response:</h2>
-    <div id="responseContainer"></div>
-    <!--<pre id="responseContainer"></pre>-->
+            <h2>Headers:</h2>
+            <table id="headersTable" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Value</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <input type="text" class="header-name" placeholder="Name" list="headerNames"
+                                   onchange="updateHeaderValueAutocomplete(this)">
 
-    <h2>Result:</h2>
-    <div id="resultContainer"></div>
+                            <datalist id="headerNames"></datalist>
+                        </td>
+
+                        <td>
+                            <input type="text" class="header-value" placeholder="Value" list="headerValues">
+                            <datalist id="headerValues"></datalist>
+                        </td>
+                        <td class="header-controls">
+                            <button type="button" onclick="addHeaderRow()">+</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <label for="bodyInputType">Body Input Type:</label>
+            <div id="bodyInputType">
+                <input type="radio" name="bodyType" value="none" checked> None
+                <input type="radio" name="bodyType" value="table"> Table
+                <input type="radio" name="bodyType" value="text"> Text
+            </div>
+
+            <div id="bodyInputs">
+                <!-- Таблица для ввода данных -->
+                <table id="bodyTable" style="display: none;" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Value</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <input type="text" class="body-name" placeholder="Name">
+                            </td>
+                            <td>
+                                <input type="text" class="body-value" placeholder="Value">
+                            </td>
+                            <td class="body-controls">
+                                <button type="button" onclick="addBodyRow()">+</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Поле для ввода произвольного текста -->
+                <textarea id="bodyText" rows="4" placeholder="Request body" style="display: none;"
+                          class="method-select"></textarea>
+            </div>
+
+            <button type="submit">Send Request</button>
+        </form>
+
+        <h2>HTTP Request:</h2>
+        <pre id="requestContainer"></pre>
+
+        <h2>The request view on the server:</h2>
+        <div id="requestViewContainer"></div>
+        <pre id="requestViewPreContainer"></pre>
+
+        <h2>Response:</h2>
+        <div id="responseContainer"></div>
+        <pre id="responsePreContainer"></pre>
+
+        <h2>Result:</h2>
+        <div id="resultContainer"></div>
+    </div>
 
     <script src="js/script.js"></script>
 </body>
+
 </html>
-
-
