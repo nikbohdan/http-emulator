@@ -32,10 +32,9 @@ namespace HttpLearningApp.API.Controllers
 
             if (user == null)
             {
-                return NotFound();
+                return NotFound(new ResponseWrapper<object>(requestDetails, false));
             }
 
-            //return Ok(user);
             return Ok(new ResponseWrapper<User>(user, requestDetails));
         }
 
@@ -49,7 +48,7 @@ namespace HttpLearningApp.API.Controllers
             var requestDetails = await this.requestDetailsService.GetRequestDetails(request);
 
             var users = await this.userService.GetAllUsersAsync();
-            //return Ok(users);
+
             return Ok(new ResponseWrapper<IEnumerable<User>>(users, requestDetails));
         }
 
@@ -66,14 +65,12 @@ namespace HttpLearningApp.API.Controllers
             {
                 var createdUserId = await this.userService.AddUserAsync(addUserDTO);
                 var uri = $"/Crud/GetUser?id={createdUserId}";
-                //return Created(uri, createdUserId);
+
                 return Created(uri, new ResponseWrapper<int>(createdUserId, requestDetails));
             }
             catch (InvalidOperationException ex)
             {
-                //ModelState.AddModelError("Id", ex.Message);
-                //return BadRequest(ModelState);
-                return BadRequest(new ResponseWrapper<string>(ex.Message, requestDetails));
+                return BadRequest(new ResponseWrapper<string>(ex.Message, requestDetails, false));
             }
         }
 
@@ -99,8 +96,7 @@ namespace HttpLearningApp.API.Controllers
             }
             catch (Exception ex)
             {
-                //ModelState.AddModelError("Id", ex.Message);
-                return BadRequest(new ResponseWrapper<string>(ex.Message, requestDetails));
+                return BadRequest(new ResponseWrapper<string>(ex.Message, requestDetails, false));
             }
         }
 
@@ -114,7 +110,7 @@ namespace HttpLearningApp.API.Controllers
 
             if (!await this.userService.UserExist(id))
             {
-                return NotFound(new ResponseWrapper<object>(requestDetails));
+                return NotFound(new ResponseWrapper<object>(requestDetails, false));
             }
 
             await this.userService.DeleteUserAsync(id);

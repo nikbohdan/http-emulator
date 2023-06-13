@@ -305,18 +305,11 @@
             <span class="span-url">Endpoints</span>
 
             <div id="urlInputs">
-                <!-- URL Select -->
-                <!--<select id="urlSelect" style="display: none;" class="method-select">
-        <option value="https://api.example.com/endpoint1">Endpoint 1</option>
-        <option value="https://api.example.com/endpoint2">Endpoint 2</option>
-        <option value="https://api.example.com/endpoint3">Endpoint 3</option>
-    </select>-->
                 <input type="text" placeholder="Endpoint address" style="display: none;" list="endpointsValues" id="endpointInput">
                 <datalist id="endpointsValues">
                     <option value="/api/RequestDetails/GetRequest"></option>
                     <option value="/api/RequestDetails/PostRequest"></option>
                     <option value="/api/Crud/GetUser"></option>
-                    <option value="/api/Crud/GetAllUsers"></option>
                     <option value="/api/Crud/GetAllUsers"></option>
                     <option value="/api/Crud/PostUser"></option>
                     <option value="/api/Crud/PutUser"></option>
@@ -406,16 +399,16 @@
         <h2>HTTP Request:</h2>
         <pre id="requestContainer"></pre>
 
-        <h2>The request view on the server:</h2>
+        <h2 style="display: none;" id="requestViewH">The request view on the server:</h2>
         <div id="requestViewContainer"></div>
-        <pre id="requestViewPreContainer"></pre>
+        <pre id="requestViewPreContainer" style="display: none;"></pre>
 
         <h2>Response:</h2>
         <div id="responseContainer"></div>
-        <pre id="responsePreContainer"></pre>
+        <pre id="responsePreContainer" style="display: none;"></pre>
 
-        <h2>Result:</h2>
-        <div id="resultContainer"></div>
+        <h2 style="display: block;" id="resultH">Result:</h2>
+        <div id="resultContainer" style="display: block;"></div>
     </div>
 
     <script src="js/script.js"></script>
