@@ -59,6 +59,54 @@ const httpHeadersDictionary = {
 };
 
 
+var httpStatusCodes = {
+    100: "Continue - The server has received the initial part of the request and is waiting for the client to send the remaining parts.",
+    101: "Switching Protocols - The server is changing protocols according to the client's request.",
+    200: "OK - The request has succeeded. The response depends on the request method.",
+    201: "Created - The request has been fulfilled, and a new resource is created as a result.",
+    202: "Accepted - The request has been accepted for processing, but the processing has not been completed yet.",
+    203: "Non-Authoritative Information - The server successfully processed the request, but is returning information from a different source.",
+    204: "No Content - The server successfully processed the request, but there is no content to send back.",
+    205: "Reset Content - The server successfully processed the request, and the user agent should reset the document view.",
+    206: "Partial Content - The server is delivering only part of the resource due to a range header sent by the client.",
+    300: "Multiple Choices - The requested resource has multiple choices, each with different locations.",
+    301: "Moved Permanently - The requested resource has been permanently moved to a new location.",
+    302: "Found - The requested resource has been temporarily moved to a different location.",
+    303: "See Other - The response to the request can be found under a different URI.",
+    304: "Not Modified - The client can use the cached version of the requested resource.",
+    307: "Temporary Redirect - The requested resource has been temporarily moved to a different location.",
+    308: "Permanent Redirect - The requested resource has been permanently moved to a different location.",
+    400: "Bad Request - The server could not understand the request due to malformed syntax or invalid data.",
+    401: "Unauthorized - The client must authenticate itself to get the requested response.",
+    402: "Payment Required - Reserved for future use. The original intention was that this code might be used as part of some form of digital cash or micropayment scheme.",
+    403: "Forbidden - The client does not have permission to access the requested resource.",
+    404: "Not Found - The server could not find the requested resource.",
+    405: "Method Not Allowed - The method specified in the request is not allowed for the resource.",
+    406: "Not Acceptable - The server cannot generate a response that matches the list of acceptable values defined in the request's headers.",
+    407: "Proxy Authentication Required - The client must authenticate itself with the proxy.",
+    408: "Request Timeout - The server timed out waiting for the request.",
+    409: "Conflict - The request could not be completed due to a conflict with the current state of the resource.",
+    410: "Gone - The requested resource is no longer available and has been permanently removed.",
+    411: "Length Required - The server requires a valid 'Content-Length' header to be specified in the request.",
+    412: "Precondition Failed - The precondition given in the request evaluated to false by the server.",
+    413: "Payload Too Large - The request entity is larger than the server is willing or able to process.",
+    414: "URI Too Long - The request URI exceeds the maximum length allowed by the server.",
+    415: "Unsupported Media Type - The server does not support the media type used in the request.",
+    416: "Range Not Satisfiable - The requested range cannot be fulfilled by the server.",
+    417: "Expectation Failed - The server cannot meet the requirements specified in the Expect request header.",
+    422: "Unprocessable Entity - The request was well-formed but unable to be followed due to semantic errors.",
+    429: "Too Many Requests - The user has sent too many requests in a given amount of time.",
+    500: "Internal Server Error - The server encountered an unexpected condition that prevented it from fulfilling the request.",
+    501: "Not Implemented - The server does not support the functionality required to fulfill the request.",
+    502: "Bad Gateway - The server, while acting as a gateway or proxy, received an invalid response from an upstream server.",
+    503: "Service Unavailable - The server is currently unable to handle the request due to a temporary overload or maintenance of the server.",
+    504: "Gateway Timeout - The server, while acting as a gateway or proxy, did not receive a timely response from an upstream server.",
+    505: "HTTP Version Not Supported - The server does not support the HTTP protocol version used in the request.",
+};
+
+console.log(httpStatusCodes);
+
+
 helpButton.addEventListener('click', function () {
     isOpen = !isOpen; // Инвертируем состояние окна
 
@@ -208,22 +256,22 @@ function updateHeaderAutocomplete() {
         input.setAttribute('list', 'headerNames');
     });
 
-    if (header === 'Content-Type') {
-        const headerValues = document.getElementById('headerValues');
+    //if (header === 'Content-Type') {
+    //    const headerValues = document.getElementById('headerValues');
 
-        // Clear existing options
-        headerValues.innerHTML = '';
+    //    // Clear existing options
+    //    headerValues.innerHTML = '';
 
-        // Define suggested values for "Content-Type"
-        const contentTypes = ['application/json', 'application/xml', 'application/x-www-form-urlencoded', 'text/plain'];
+    //    // Define suggested values for "Content-Type"
+    //    const contentTypes = ['application/json', 'application/xml', 'application/x-www-form-urlencoded', 'text/plain'];
 
-        // Create new options
-        contentTypes.forEach(contentType => {
-            const option = document.createElement('option');
-            option.value = contentType;
-            headerValues.appendChild(option);
-        });
-    }
+    //    // Create new options
+    //    contentTypes.forEach(contentType => {
+    //        const option = document.createElement('option');
+    //        option.value = contentType;
+    //        headerValues.appendChild(option);
+    //    });
+    //}
 }
 
 function clearHeadersTable() {
@@ -358,6 +406,9 @@ form.addEventListener('submit', async (e) => {
         body = bodyText.value;
     }
 
+    removeAllChildNodes(requestViewContainer);
+    requestViewPreContainer.textContent = "";
+
     const config = {
         method,
         url,
@@ -373,11 +424,16 @@ form.addEventListener('submit', async (e) => {
         displayResponse(response);
         displayResult(response.data);
     } catch (error) {
-        console.error(error);
+        if (error.response !== null && error.response !== undefined) {
+            displayRequest(config);
+            displayError(error);
+        }
+        
+        //console.error(error);
 
-        requestContainer.textContent = 'Error occurred. Please check the console for details.';
-        responseContainer.textContent = 'Error occurred. Please check the console for details.';
-        resultContainer.textContent = 'Error occurred. Please check the console for details.';
+        //requestContainer.textContent = 'Error occurred. Please check the console for details.';
+        //responseContainer.textContent = 'Error occurred. Please check the console for details.';
+        //resultContainer.textContent = 'Error occurred. Please check the console for details.';
     }
 });
 
@@ -415,9 +471,10 @@ function displayRequestView(response) {
             continue;
         }
         if (name.toLowerCase() == 'body') {
-            let bodyText = 'Body:\n'
-            bodyText += JSON.stringify(value, null, 2);
-            responsePreContainer.textContent = bodyText;
+            //let bodyText = 'Body:\n'
+            //bodyText += JSON.stringify(value, null, 2);
+            //responsePreContainer.textContent = bodyText;
+            displayBody(value, requestViewPreContainer);
             continue;
         }
 
@@ -427,6 +484,15 @@ function displayRequestView(response) {
     }
 }
 
+function displayBody(value, preContainer) {
+    if (value !== null && value !== "") {
+        let bodyText = 'Body:\n'
+        bodyText += JSON.stringify(value, null, 2);
+        preContainer.textContent = bodyText;
+    } else {
+        preContainer.textContent = "";
+    }
+}
 
 function displayResponse(response) {
     removeAllChildNodes(responseContainer);
@@ -435,8 +501,12 @@ function displayResponse(response) {
     const data = response.data.data;
 
 
-    let statusTextNode = document.createTextNode(`Status: ${response.status} ${response.statusText}`);
+    let statusTextNode = document.createTextNode(`Status: ${response.status} ${response.statusText} `);
+    const infoIcon = document.createElement('i');
+    infoIcon.className = 'fa fa-question-circle';
+    infoIcon.title = httpStatusCodes[response.status];
     responseContainer.appendChild(statusTextNode);
+    responseContainer.appendChild(infoIcon);
     addNewLine(responseContainer);
 
 
@@ -448,9 +518,10 @@ function displayResponse(response) {
 
     //let responseBodyTextNode = document.createTextNode('Response Body:');
     //responseContainer.appendChild(responseBodyTextNode);
-    let bodyText = 'Body:\n'
-    bodyText += JSON.stringify(data, null, 2);
-    responsePreContainer.textContent = bodyText;
+    displayBody(value, responsePreContainer);
+    //let bodyText = 'Body:\n'
+    //bodyText += JSON.stringify(data, null, 2);
+    //responsePreContainer.textContent = bodyText;
 
 }
 
@@ -467,7 +538,30 @@ function displayResult(data) {
 
 
 function displayError(error) {
-    responseContainer.textContent = `Error: ${error.message}`;
+    removeAllChildNodes(responseContainer);
+
+    let response = error.response;
+    let statusTextNode = document.createTextNode(`Status: ${response.status} ${response.statusText} `);
+    const infoIcon = document.createElement('i');
+    infoIcon.className = 'fa fa-question-circle';
+    infoIcon.title = httpStatusCodes[response.status];
+    responseContainer.appendChild(statusTextNode);
+    responseContainer.appendChild(infoIcon);
+    addNewLine(responseContainer);
+
+    let headersTextNode = document.createTextNode('Headers:');
+    responseContainer.appendChild(headersTextNode);
+    addNewLine(responseContainer);
+
+    addHeadersTable(responseContainer, response.headers);
+
+    if (response.data !== null && response.data !== "") {
+        let errorText = 'Data:\n'
+        errorText += JSON.stringify(response.data, null, 2);
+        responsePreContainer.textContent = errorText;
+    } else {
+        responsePreContainer.textContent = "";
+    }
 }
 
 function removeAllChildNodes(parent) {
