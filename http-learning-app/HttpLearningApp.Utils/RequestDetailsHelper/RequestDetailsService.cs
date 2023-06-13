@@ -1,45 +1,15 @@
 ﻿using System.Text;
 using System.Xml;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 
-
-namespace http_learning_app.Controllers
+namespace HttpLearningApp.Utils.RequestDetailsHelper
 {
-    [Route("api/[controller]/[action]")]
-    [ApiController]
-    public class RequestDetailsController : ControllerBase
+    public class RequestDetailsService : IRequestDetailsService
     {
-        [HttpGet]
-        public IActionResult GetRequest()
+        public async Task<RequestDetails> GetRequestDetails(HttpRequest request)
         {
-            var request = HttpContext.Request;
-
-            var headers = request.Headers.ToDictionary(
-                header => header.Key,
-                header => header.Value.ToString());
-
-            var details = new
-            {
-                Method = request.Method,
-                Scheme = request.Scheme,
-                Host = request.Host.Value,
-                PathBase = request.PathBase.Value,
-                Path = request.Path.Value,
-                QueryString = request.QueryString.Value,
-                Headers = headers
-            };
-
-            return new JsonResult(details);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> PostRequest()
-        {
-            var request = HttpContext.Request;
-            request.EnableBuffering(); // Enables request body buffering
-
             var headers = request.Headers.ToDictionary(
                 header => header.Key,
                 header => header.Value.ToString());
@@ -49,6 +19,25 @@ namespace http_learning_app.Controllers
 
             // Convert the request body to a string if it's a type we can handle
             var body = string.Empty;
+
+            if (request.Body == null)
+            {
+                body = "The request body is empty";
+
+                return new RequestDetails
+                {
+                    Method = request.Method,
+                    Scheme = request.Scheme,
+                    Host = request.Host.Value,
+                    PathBase = request.PathBase.Value,
+                    Path = request.Path.Value,
+                    QueryString = request.QueryString.Value,
+                    Headers = headers,
+                    ContentType = contentType,
+                    Body = body
+                };
+            }
+
             if (request.Body != null && contentType is "application/json" or "text/plain")
             {
                 using (var reader = new StreamReader(request.Body, Encoding.UTF8, true, 1024, true))
@@ -89,7 +78,7 @@ namespace http_learning_app.Controllers
                 body = "Failed to read the request body.";
             }
 
-            var details = new
+            return new RequestDetails
             {
                 Method = request.Method,
                 Scheme = request.Scheme,
@@ -101,8 +90,6 @@ namespace http_learning_app.Controllers
                 ContentType = contentType,
                 Body = deserializedBody ?? body
             };
-
-            return new JsonResult(details);
         }
     }
 }
