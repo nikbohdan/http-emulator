@@ -8,9 +8,16 @@ const bodyTable = document.getElementById('bodyTable');
 const bodyText = document.getElementById('bodyText');
 const requestContainer = document.getElementById('requestContainer');
 const responseContainer = document.getElementById('responseContainer');
-const resultContainer = document.getElementById('resultContainer');
+const responsePreContainer = document.getElementById('responsePreContainer');
+const requestViewContainer = document.getElementById('requestViewContainer');
+const requestViewPreContainer = document.getElementById('requestViewPreContainer');
 const toggleButton = document.getElementById('toggle');
 const urlSelect = document.getElementById('urlSelect');
+// При нажатии на кнопку окно выдвигается или скрывается, кнопка перемещается
+var helpButton = document.querySelector('.help-button');
+var helpWindow = document.querySelector('.help-window');
+var leftSection = document.querySelector('.left-section');
+var isOpen = false; // Флаг для отслеживания состояния окна
 
 const httpHeadersDictionary = {
     "accept": "Media type(s) that is/are acceptable for the response.",
@@ -51,6 +58,59 @@ const httpHeadersDictionary = {
     // Add more headers as needed
 };
 
+
+helpButton.addEventListener('click', function () {
+    isOpen = !isOpen; // Инвертируем состояние окна
+
+    if (isOpen) {
+        helpWindow.style.transform = 'translateX(0)';
+        helpButton.style.right = 'calc(33.33% - 70px)'; /* При открытии окна кнопка перемещается вместе с ним */
+        leftSection.style.width = 'calc(67% - 40px)'; /* При открытии окна левая часть сдвигается и занимает 2/3 экрана */
+    } else {
+        helpWindow.style.transform = 'translateX(100%)';
+        helpButton.style.right = '-35px'; /* При закрытии окна кнопка возвращается к правому краю без отступа */
+        leftSection.style.width = '95%'; /* При закрытии окна левая часть возвращается к 100% ширины экрана */
+    }
+});
+
+// Функция для обновления информации о методе
+function updateMethodInfo(method) {
+    let theory = '';
+
+    switch (method) {
+        case 'GET':
+            theory = 'Метод GET використовується для отримання ресурсів з сервера. Зазвичай, при використанні методу GET, дані запиту передаються у рядку запиту (query string) в URL-адресі. Метод GET не передає дані через тіло запиту (request body) і використовується для запиту ресурсів без внесення змін на сервері. Такий запит може бути кешованим браузером.';
+            break;
+        case 'POST':
+            theory = 'Метод POST використовується для надсилання даних на сервер для обробки. У відмінність від методу GET, дані запиту в методі POST передаються через тіло запиту (request body) і не відображаються у URL-адресі. Цей метод зазвичай використовується для створення нових ресурсів на сервері або виконання дій, що змінюють стан існуючих ресурсів.';
+            break;
+        case 'PUT':
+            theory = 'Метод PUT використовується для оновлення існуючого ресурсу на сервері. Він також передає дані через тіло запиту, подібно до методу POST. Основна відмінність між методами PUT і POST полягає в тому, що метод PUT є ідемпотентним. Це означає, що при кількох послідовних ідентичних запитах PUT стан ресурсу на сервері не змінюється після першого виконання запиту.';
+            break;
+        case 'DELETE':
+            theory = 'Метод DELETE використовується для видалення ресурсу на сервері. Він вказує серверу, що потрібно видалити вказаний ресурс. Запит DELETE також може містити дані в тілі запиту, які допомагають серверу здійснити видалення. Як і метод PUT, метод DELETE також є ідемпотентним. Це означає, що при кількох послідовних ідентичних запитах DELETE стан сервера не змінюється після першого виконання запиту.';
+            break;
+        default:
+            theory = 'Інформація про обраний метод';
+            break;
+    }
+    helpWindow.textContent = theory;
+    helpWindow.style.backgroundColor = "WhiteSmoke";
+}
+
+// Устанавливаем информацию о методе GET по умолчанию
+updateMethodInfo('GET');
+
+// Обработчик события для обновления информации при изменении выбранного метода
+methodSelect.addEventListener('change', function () {
+    const selectedMethod = this.value;
+    updateMethodInfo(selectedMethod);
+
+    // Clear the headers table and add a default row on page load
+    clearHeadersTable();
+    updateHeaderAutocomplete();
+});
+
 // Обработчик события изменения типа ввода для URL
 toggleButton.addEventListener('change', function () {
     if (toggleButton.checked) {
@@ -61,7 +121,6 @@ toggleButton.addEventListener('change', function () {
         urlInput.style.display = 'block';
     }
 });
-
 
 // Valid headers list
 const validHeaders = {
@@ -148,6 +207,105 @@ function updateHeaderAutocomplete() {
     headerNameInputs.forEach(input => {
         input.setAttribute('list', 'headerNames');
     });
+
+    if (header === 'Content-Type') {
+        const headerValues = document.getElementById('headerValues');
+
+        // Clear existing options
+        headerValues.innerHTML = '';
+
+        // Define suggested values for "Content-Type"
+        const contentTypes = ['application/json', 'application/xml', 'application/x-www-form-urlencoded', 'text/plain'];
+
+        // Create new options
+        contentTypes.forEach(contentType => {
+            const option = document.createElement('option');
+            option.value = contentType;
+            headerValues.appendChild(option);
+        });
+    }
+}
+
+function clearHeadersTable() {
+    const tbody = headersTable.querySelector('tbody');
+    const rows = tbody.querySelectorAll('tr');
+
+    // Удаляем все строки, начиная со второй
+    for (let i = 1; i < rows.length; i++) {
+        rows[i].remove();
+    }
+
+    // Очищаем значения первой строки
+    const defaultRow = rows[0];
+    const nameInput = defaultRow.querySelector('.header-name');
+    const valueInput = defaultRow.querySelector('.header-value');
+    nameInput.value = '';
+    valueInput.value = '';
+    updateHeaderAutocomplete();
+}
+
+function removeHeaderRow(row) {
+    const tbody = headersTable.querySelector('tbody');
+    tbody.removeChild(row);
+}
+
+function addHeaderRow() {
+    const tbody = headersTable.querySelector('tbody');
+    const newRow = document.createElement('tr');
+
+    const nameCell = document.createElement('td');
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.className = 'header-name';
+    nameInput.placeholder = 'Name';
+    nameInput.setAttribute('onchange', 'updateHeaderValueAutocomplete(this)');
+    nameCell.appendChild(nameInput);
+    newRow.appendChild(nameCell);
+
+    const valueCell = document.createElement('td');
+    const valueInput = document.createElement('input');
+    valueInput.type = 'text';
+    valueInput.className = 'header-value';
+    valueInput.placeholder = 'Value';
+    valueCell.appendChild(valueInput);
+    newRow.appendChild(valueCell);
+
+    const controlsCell = document.createElement('td');
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.textContent = '-';
+    removeButton.onclick = () => removeHeaderRow(newRow);
+    controlsCell.appendChild(removeButton);
+    newRow.appendChild(controlsCell);
+
+    tbody.appendChild(newRow);
+
+    updateHeaderAutocomplete(); // Обновляем автозаполнение после добавления нового поля заголовка
+}
+
+function updateHeaderValueAutocomplete(input) {
+    const selectedHeader = input.value;
+    const row = input.closest('tr');
+    const valueInput = row.querySelector('.header-value');
+    const headerValues = document.getElementById('headerValues');
+
+    // Clear existing options
+    headerValues.innerHTML = '';
+
+    if (selectedHeader === 'Content-Type') {
+        // Define suggested values for "Content-Type"
+        const contentTypes = ['application/json', 'application/xml', 'application/x-www-form-urlencoded', 'text/plain'];
+
+        // Create new options
+        contentTypes.forEach(contentType => {
+            const option = document.createElement('option');
+            option.value = contentType;
+            headerValues.appendChild(option);
+        });
+    }
+
+    // Update autocomplete for value input field
+    valueInput.setAttribute('list', 'headerValues');
 }
 
 function parseBodyTable() {
@@ -171,8 +329,6 @@ function parseBodyTable() {
     return params.toString();
 }
 
-
-
 // Add event listener to the form
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -191,7 +347,6 @@ form.addEventListener('submit', async (e) => {
             headers[name] = value;
 
         }
-
 
     });
 
@@ -214,14 +369,17 @@ form.addEventListener('submit', async (e) => {
         const response = await axios(config);
 
         displayRequest(config);
+        displayRequestView(response);
         displayResponse(response);
         displayResult(response.data);
     } catch (error) {
         console.error(error);
+
+        requestContainer.textContent = 'Error occurred. Please check the console for details.';
+        responseContainer.textContent = 'Error occurred. Please check the console for details.';
         resultContainer.textContent = 'Error occurred. Please check the console for details.';
     }
 });
-
 
 function displayRequest(request) {
     const { method, url, headers, data } = request;
@@ -246,11 +404,35 @@ function displayRequest(request) {
     requestContainer.textContent = requestText;
 }
 
+function displayRequestView(response) {
+    removeAllChildNodes(requestViewContainer);
+
+    const data = response.data.requestDetails;
+
+    for (const [name, value] of Object.entries(data)) {
+        if (name.toLowerCase() == 'headers') {
+            addHeadersTable(requestViewContainer, value);
+            continue;
+        }
+        if (name.toLowerCase() == 'body') {
+            let bodyText = 'Body:\n'
+            bodyText += JSON.stringify(value, null, 2);
+            responsePreContainer.textContent = bodyText;
+            continue;
+        }
+
+        let textNode = document.createTextNode(`${name}: ${JSON.stringify(value, null, 2)}`);
+        requestViewContainer.appendChild(textNode);
+        addNewLine(requestViewContainer);
+    }
+}
+
+
 function displayResponse(response) {
     removeAllChildNodes(responseContainer);
 
     const headers = response.headers;
-    const data = response.data;
+    const data = response.data.data;
 
 
     let statusTextNode = document.createTextNode(`Status: ${response.status} ${response.statusText}`);
@@ -264,20 +446,12 @@ function displayResponse(response) {
 
     addHeadersTable(responseContainer, headers);
 
-    let responseBodyTextNode = document.createTextNode('Response Body:');
-    responseContainer.appendChild(responseBodyTextNode);
-    addNewLine(responseContainer);
+    //let responseBodyTextNode = document.createTextNode('Response Body:');
+    //responseContainer.appendChild(responseBodyTextNode);
+    let bodyText = 'Body:\n'
+    bodyText += JSON.stringify(data, null, 2);
+    responsePreContainer.textContent = bodyText;
 
-    for (const [name, value] of Object.entries(data)) {
-        if (name.toLowerCase() == 'headers') {
-            addHeadersTable(responseContainer, value);
-            continue;
-        }
-
-        let textNode = document.createTextNode(`${name}: ${JSON.stringify(value, null, 2)}`);
-        responseContainer.appendChild(textNode);
-        addNewLine(responseContainer);
-    }
 }
 
 function displayResult(data) {
@@ -292,6 +466,9 @@ function displayResult(data) {
 }
 
 
+function displayError(error) {
+    responseContainer.textContent = `Error: ${error.message}`;
+}
 
 function removeAllChildNodes(parent) {
     while (parent.firstChild) {
@@ -342,69 +519,6 @@ function addHeadersTable(container, headers) {
     // Add the created table to your container
     container.appendChild(headersTable);
 }
-
-
-function displayError(error) {
-    responseContainer.textContent = `Error: ${error.message}`;
-}
-
-function removeHeaderRow(row) {
-    const tbody = headersTable.querySelector('tbody');
-    tbody.removeChild(row);
-}
-
-function addHeaderRow() {
-    const tbody = headersTable.querySelector('tbody');
-    const newRow = document.createElement('tr');
-
-    const nameCell = document.createElement('td');
-    const nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.className = 'header-name';
-    nameInput.placeholder = 'Name';
-    nameInput.setAttribute('list', 'headerNames'); // Set the datalist ID for autocomplete
-    nameCell.appendChild(nameInput);
-    newRow.appendChild(nameCell);
-
-    const valueCell = document.createElement('td');
-    const valueInput = document.createElement('input');
-    valueInput.type = 'text';
-    valueInput.className = 'header-value';
-    valueInput.placeholder = 'Value';
-    valueCell.appendChild(valueInput);
-    newRow.appendChild(valueCell);
-
-    const controlsCell = document.createElement('td');
-    const removeButton = document.createElement('button');
-    removeButton.type = 'button';
-    removeButton.textContent = '-';
-    removeButton.onclick = () => removeHeaderRow(newRow);
-    controlsCell.appendChild(removeButton);
-    newRow.appendChild(controlsCell);
-
-    tbody.appendChild(newRow);
-
-    // Update autocomplete for new header fields
-    const headerNamesDatalist = document.getElementById('headerNames');
-    const headerNameInputs = Array.from(document.querySelectorAll('.header-name'));
-    headerNameInputs.forEach(input => {
-        input.setAttribute('list', 'headerNames');
-    });
-
-    // Update autocomplete options for new headers
-    const method = methodSelect.value;
-    const headerNames = validHeaders[method] || [];
-    headerNamesDatalist.innerHTML = '';
-    headerNames.forEach(header => {
-        const option = document.createElement('option');
-        option.value = header;
-        headerNamesDatalist.appendChild(option);
-    });
-}
-
-
-
-
 
 // Initialize header autocomplete based on the default method
 updateHeaderAutocomplete();

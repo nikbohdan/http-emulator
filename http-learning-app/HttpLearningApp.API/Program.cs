@@ -5,6 +5,7 @@ using HttpLearningApp.DAL.Data;
 using HttpLearningApp.DAL.RepositoryImplementation;
 using HttpLearningApp.Domain.Entities;
 using HttpLearningApp.Domain.Interfaces.Repositories;
+using HttpLearningApp.Utils.RequestDetailsHelper;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,7 @@ builder.Services.AddDbContext<DataContext>(options =>
 
 builder.Services.AddScoped<IGenericRepository<User>, GenericRepository<User>>();
 builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IRequestDetailsService, RequestDetailsService>();
 
 builder.Services.AddAutoMapper(typeof(MapperProfile));
 

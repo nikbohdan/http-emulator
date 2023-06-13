@@ -1,6 +1,8 @@
 ﻿using HttpLearningApp.BLL.Interfaces;
 using HttpLearningApp.Domain.DTOs;
 using HttpLearningApp.Domain.Entities;
+using HttpLearningApp.Utils.RequestDetailsHelper;
+using HttpLearningApp.Utils.Wrappers.Response;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HttpLearningApp.API.Controllers
@@ -10,15 +12,22 @@ namespace HttpLearningApp.API.Controllers
     public class CrudController : Controller
     {
         private readonly IUserService userService;
+        private readonly IRequestDetailsService requestDetailsService;
 
-        public CrudController(IUserService userService)
+        public CrudController(IUserService userService, IRequestDetailsService requestDetailsService)
         {
             this.userService = userService;
+            this.requestDetailsService = requestDetailsService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetUser([FromQuery] int id)
         {
+            var request = HttpContext.Request;
+            request.EnableBuffering(); // Enables request body buffering
+
+            var requestDetails = await this.requestDetailsService.GetRequestDetails(request);
+
             var user = await this.userService.GetUserAsync(id);
 
             if (user == null)
@@ -26,7 +35,8 @@ namespace HttpLearningApp.API.Controllers
                 return NotFound();
             }
 
-            return Ok(user);
+            //return Ok(user);
+            return Ok(new ResponseWrapper<User>(user, requestDetails));
         }
 
         [HttpGet]
@@ -54,46 +64,76 @@ namespace HttpLearningApp.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
+            var request = HttpContext.Request;
+            request.EnableBuffering(); // Enables request body buffering
+
+            var requestDetails = await this.requestDetailsService.GetRequestDetails(request);
+
             var users = await this.userService.GetAllUsersAsync();
-            return Ok(users);
+            //return Ok(users);
+            return Ok(new ResponseWrapper<IEnumerable<User>>(users, requestDetails));
         }
 
         [HttpPost]
         public async Task<IActionResult> PostUser([FromBody] AddUserDTO addUserDTO)
         {
+            var request = HttpContext.Request;
+            request.EnableBuffering(); // Enables request body buffering
+
+            var requestDetails = await this.requestDetailsService.GetRequestDetails(request);
+
             try
             {
                 var createdUserId = await this.userService.AddUserAsync(addUserDTO);
-                var uri = $"/Crud/GetUser/{createdUserId}";
-                return Created(uri , createdUserId);
+                var uri = $"/Crud/GetUser?id={createdUserId}";
+                //return Created(uri, createdUserId);
+                return Created(uri, new ResponseWrapper<int>(createdUserId, requestDetails));
             }
             catch (InvalidOperationException ex)
             {
-                ModelState.AddModelError("Id", ex.Message);
-                return BadRequest(ModelState);
+                //ModelState.AddModelError("Id", ex.Message);
+                //return BadRequest(ModelState);
+                return BadRequest(new ResponseWrapper<string>(ex.Message, requestDetails));
             }
         }
 
         [HttpPut]
         public async Task<IActionResult> PutUser([FromBody] User user)
         {
-            if (!await this.userService.UserExist(user.Id))
-            {
-                var createdUserId = await this.userService.AddUserAsync(user);
-                var uri = $"/Crud/GetUser/{createdUserId}";
-                return Created(uri, createdUserId);
-            }
+            var request = HttpContext.Request;
+            request.EnableBuffering(); // Enables request body buffering
 
-            await this.userService.UpdateUserAsync(user);
-            return NoContent();
+            var requestDetails = await this.requestDetailsService.GetRequestDetails(request);
+            try
+            {
+                if (!await this.userService.UserExist(user.Id))
+                {
+                    var createdUserId = await this.userService.AddUserAsync(user);
+                    var uri = $"/Crud/GetUser?id={createdUserId}";
+                    return Created(uri, new ResponseWrapper<int>(createdUserId, requestDetails));
+                }
+
+                await this.userService.UpdateUserAsync(user);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                //ModelState.AddModelError("Id", ex.Message);
+                return BadRequest(new ResponseWrapper<string>(ex.Message, requestDetails));
+            }
         }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteUser([FromQuery] int id)
         {
+            var request = HttpContext.Request;
+            request.EnableBuffering(); // Enables request body buffering
+
+            var requestDetails = await this.requestDetailsService.GetRequestDetails(request);
+
             if (!await this.userService.UserExist(id))
             {
-                return NotFound();
+                return NotFound(new ResponseWrapper<object>(requestDetails));
             }
 
             await this.userService.DeleteUserAsync(id);
