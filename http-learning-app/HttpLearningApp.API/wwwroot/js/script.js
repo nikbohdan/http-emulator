@@ -60,7 +60,8 @@ const httpHeadersDictionary = {
     "user-agent": "The user agent string of the user agent.",
     "upgrade": "Ask the server to upgrade to another protocol.",
     "via": "Informs the server of proxies through which the request was sent.",
-    "warning": "A general warning about possible problems with the entity body."
+    "warning": "A general warning about possible problems with the entity body.",
+    "location": "The Location header is an HTTP header used in server responses to instruct the client to redirect to a different URL. It specifies the new URL where the requested resource can be found."
     // Add more headers as needed
 };
 
@@ -489,13 +490,13 @@ function displayRequestView(response) {
 }
 
 function displayBody(value, preContainer) {
-    preContainer.style.display = 'block';
     if (value !== null && value !== "" && value !== undefined) {
+        preContainer.style.display = 'block';
         let bodyText = 'Body:\n'
         bodyText += JSON.stringify(value, null, 2);
         preContainer.textContent = bodyText;
     } else {
-        preContainer.textContent = "";
+        preContainerCleanAndInvisibility(preContainer);
     }
 }
 
@@ -566,12 +567,17 @@ function displayError(error) {
 
     if (response.data !== null && response.data !== "") {
         if (response.data.succeeded !== null && response.data.succeeded !== undefined && !response.data.succeeded) {
-            displayRequestView(response);
 
-            let errorText = 'Data:\n'
-            errorText += JSON.stringify(response.data.data, null, 2);
-            responsePreContainer.style.display = 'block';
-            responsePreContainer.textContent = errorText;
+            displayRequestView(response);
+            if (response.data.data !== null && response.data.data !== undefined && response.data.data !== "") {
+                let errorText = 'Data:\n'
+                errorText += JSON.stringify(response.data.data, null, 2);
+                responsePreContainer.style.display = 'block';
+                responsePreContainer.textContent = errorText;
+            } else {
+                preContainerCleanAndInvisibility(responsePreContainer);
+            }
+
         } else {
             let errorText = 'Data:\n'
             errorText += JSON.stringify(response.data, null, 2);
