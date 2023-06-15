@@ -9,7 +9,9 @@ namespace HttpLearningApp.Domain.Interfaces.Repositories
         Task<int> CreateAsync(T entity);
 
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicateExpression = null,
-            bool disableTracking = true);
+            bool disableTracking = true); 
+        
+        Task<IEnumerable<T>> FindAsync();
 
         IQueryable<T> Find(
             bool disableTracking = true,

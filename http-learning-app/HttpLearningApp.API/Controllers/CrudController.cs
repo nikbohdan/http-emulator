@@ -1,6 +1,6 @@
-﻿using HttpLearningApp.BLL.Interfaces;
-using HttpLearningApp.Domain.DTOs;
+﻿using HttpLearningApp.Domain.DTOs;
 using HttpLearningApp.Domain.Entities;
+using HttpLearningApp.Domain.Interfaces.Services;
 using HttpLearningApp.Utils.RequestDetailsHelper;
 using HttpLearningApp.Utils.Wrappers.Response;
 using Microsoft.AspNetCore.Mvc;

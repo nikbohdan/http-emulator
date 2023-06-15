@@ -1,7 +1,7 @@
 ﻿using HttpLearningApp.Domain.DTOs;
 using HttpLearningApp.Domain.Entities;
 
-namespace HttpLearningApp.BLL.Interfaces
+namespace HttpLearningApp.Domain.Interfaces.Services
 {
     public interface IUserService
     {
