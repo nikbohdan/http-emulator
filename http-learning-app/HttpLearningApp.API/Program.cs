@@ -1,10 +1,10 @@
 using HttpLearningApp.API.Mappers;
 using HttpLearningApp.BLL.Implementation;
-using HttpLearningApp.BLL.Interfaces;
 using HttpLearningApp.DAL.Data;
 using HttpLearningApp.DAL.RepositoryImplementation;
 using HttpLearningApp.Domain.Entities;
 using HttpLearningApp.Domain.Interfaces.Repositories;
+using HttpLearningApp.Domain.Interfaces.Services;
 using HttpLearningApp.Utils.RequestDetailsHelper;
 using Microsoft.EntityFrameworkCore;
 

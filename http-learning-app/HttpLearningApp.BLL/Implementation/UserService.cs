@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using HttpLearningApp.BLL.Interfaces;
 using HttpLearningApp.Domain.DTOs;
 using HttpLearningApp.Domain.Entities;
 using HttpLearningApp.Domain.Interfaces.Repositories;
+using HttpLearningApp.Domain.Interfaces.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace HttpLearningApp.BLL.Implementation

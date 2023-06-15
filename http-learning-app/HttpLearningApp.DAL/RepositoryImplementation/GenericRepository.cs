@@ -83,6 +83,8 @@ namespace HttpLearningApp.DAL.RepositoryImplementation
             return users;
         }
 
+        public async Task<IEnumerable<T>> FindAsync() => await this.dataContext.Set<T>().ToListAsync();
+
         public async Task<T?> GetByIdAsync(int id, Func<IQueryable<T>, IIncludableQueryable<T, object>> include = null, bool disableTracking = true)
         {
             IQueryable<T?> query = this.dataContext.Set<T>().AsQueryable();
